@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ガチクラス</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #fcfaf8;
+            color: #333;
+        }
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+            width: 100%;
+            padding: 16px 0;
+            background: rgba(255, 255, 255, 0.85);
+            margin-bottom: 20px;
+        }
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 35s linear infinite;
+        }
+        .marquee-content:hover {
+            animation-play-state: paused;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+        #view-home {
+            background-image: url('bg.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-color: #e5e5e5;
+            background-position: center top;
+            min-height: calc(100vh - 64px);
+            padding-top: 40px;
+        }
+        .hidden-view { display: none !important; }
+        .tab-active {
+            color: #ef4444;
+            border-bottom: 2px solid #ef4444;
+        }
+        .mobile-menu-open { display: flex !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <section id="view-auth" class="flex-grow flex items-center justify-center p-4 bg-gray-50">
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-xl max-w-md w-full border border-gray-100">
+            <h2 id="auth-title" class="text-2xl font-bold text-center text-red-500 mb-6">ガチクラスにログイン</h2>
+            
+            <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">メールアドレス</label>
+                    <input type="email" id="auth-email" required class="w-full border p-2.5 rounded-lg text-sm focus:outline-red-400" placeholder="example@school.com">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">パスワード（6文字以上）</label>
+                    <input type="password" id="auth-password" required class="w-full border p-2.5 rounded-lg text-sm focus:outline-red-400" placeholder="••••••••">
+                </div>
+                
+                <button type="submit" id="auth-submit-btn" class="w-full bg-red-400 hover:bg-red-500 text-white font-bold py-2.5 rounded-lg text-sm shadow transition mb-4">
+                    ログインする
+                </button>
+                
+                <div class="text-center">
+                    <button type="button" id="auth-toggle-btn" onclick="toggleAuthMode()" class="text-xs text-gray-500 hover:text-red-500 underline">
+                        初めて使う方はこちら（新規アカウント登録）
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <div id="app-content" class="hidden-view flex-grow flex flex-col">
+        <header class="bg-white shadow-sm h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-50">
+            <div class="text-red-500 font-bold text-xl md:text-2xl cursor-pointer" onclick="navigate('home')">ガチクラス</div>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium text-gray-500 h-full">
+                <button onclick="navigate('home')" id="tab-home" class="h-full px-2 hover:text-red-500 transition">ホーム</button>
+                <button onclick="navigate('board')" id="tab-board" class="h-full px-2 hover:text-red-500 transition">やってみたいボード</button>
+                <button onclick="navigate('calendar')" id="tab-calendar" class="h-full px-2 hover:text-red-500 transition">マイカレンダー</button>
+                <button onclick="navigate('quest')" id="tab-quest" class="h-full px-2 hover:text-red-500 transition">クエストボード</button>
+            </nav>
+            <div class="hidden md:flex items-center space-x-4">
+                <div class="flex items-center space-x-2 cursor-pointer hover:bg-gray-100 p-2 rounded-full transition" onclick="navigate('mypage')">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-xs">👤</div>
+                    <span id="header-user-name" class="text-sm font-medium text-gray-600">ユーザー</span>
+                </div>
+                <button onclick="handleLogout()" class="text-xs border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 px-3 py-1.5 rounded-full transition font-medium">ログアウト</button>
+            </div>
+            <button class="block md:hidden text-gray-500 hover:text-red-500 focus:outline-none p-2" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </header>
+
+        <nav id="mobile-menu" class="hidden md:hidden bg-white border-b border-gray-100 flex-col text-center font-medium text-gray-600">
+            <button onclick="navigate('home'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500">ホーム</button>
+            <button onclick="navigate('board'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500">やってみたいボード</button>
+            <button onclick="navigate('calendar'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500">マイカレンダー</button>
+            <button onclick="navigate('quest'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500">クエストボード</button>
+            <button onclick="navigate('mypage'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500 flex items-center justify-center space-x-2">
+                <span>👤 マイページ</span>
+            </button>
+            <button onclick="handleLogout(); toggleMobileMenu();" class="py-3 text-red-400 hover:bg-red-50 font-bold">ログアウト</button>
+        </nav>
+
+        <main class="flex-grow">
+            <section id="view-home" class="hidden-view px-2 md:px-0">
+                <div class="max-w-6xl mx-auto">
+                    <h2 class="text-lg md:text-2xl font-bold text-white bg-red-600 inline-block px-3 py-1 mb-3 ml-4 md:ml-6 rounded shadow-md">みんなの「やってみたい」</h2>
+                    <div class="marquee-container shadow-lg">
+                        <div class="marquee-content flex gap-4 md:gap-8 px-4" id="home-board-marquee"></div>
+                    </div>
+                    <h2 class="text-lg md:text-2xl font-bold text-white bg-red-600 inline-block px-3 py-1 mb-3 ml-4 md:ml-6 mt-6 md:mt-12 rounded shadow-md">挑戦を待つクエスト</h2>
+                    <div class="marquee-container shadow-lg">
+                        <div class="marquee-content flex gap-4 md:gap-8 px-4" id="home-quest-marquee"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-board" class="hidden-view max-w-6xl mx-auto py-6 md:py-10 px-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+                    <h1 class="text-xl md:text-2xl font-bold">やってみたいボード</h1>
+                    <button onclick="openModal('board')" class="bg-red-400 hover:bg-red-500 text-white px-5 py-2 rounded-full text-sm md:text-base font-medium shadow transition w-full sm:w-auto">
+                        ＋ 新しく投稿する
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="board-grid"></div>
+            </section>
+
+            <section id="view-calendar" class="hidden-view max-w-6xl mx-auto py-6 md:py-10 px-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold">マイカレンダー</h1>
+                        <p class="text-xs md:text-sm text-gray-500">自分が「参加する！」を押した企画のスケジュールが自動表示されます。</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow border border-gray-100 p-4 md:p-6 overflow-x-auto">
+                    <div class="min-w-[600px]">
+                        <div class="flex justify-between items-center mb-6">
+                            <button class="text-gray-400 hover:text-gray-700" onclick="changeMonth(-1)">＜</button>
+                            <h2 class="text-lg md:text-xl font-bold" id="calendar-month-year">2026年 6月</h2>
+                            <button class="text-gray-400 hover:text-gray-700" onclick="changeMonth(1)">＞</button>
+                        </div>
+                        <div class="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200" id="calendar-grid"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-quest" class="hidden-view max-w-6xl mx-auto py-6 md:py-10 px-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold mb-1">クエストボード</h1>
+                        <p class="text-xs md:text-sm text-gray-500">学外のコンテストや挑戦の場をまとめたボード。</p>
+                    </div>
+                    <button onclick="openModal('quest')" class="bg-red-400 hover:bg-red-500 text-white px-5 py-2 rounded-full text-sm md:text-base font-medium shadow transition w-full sm:w-auto">
+                        ＋ クエストを追加
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6" id="quest-grid"></div>
+            </section>
+
+            <section id="view-detail" class="hidden-view max-w-4xl mx-auto py-6 md:py-10 px-4">
+                <button onclick="navigate('board')" class="text-gray-500 hover:text-gray-800 mb-6 flex items-center text-sm md:text-base">＜ 戻る</button>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 md:p-8">
+                    <span id="detail-tag" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full mb-2 inline-block"></span>
+                    <h1 id="detail-title" class="text-xl md:text-3xl font-bold mb-4">タイトル</h1>
+                    <p id="detail-org" class="text-xs md:text-sm text-gray-400 mb-2 hidden"></p>
+                    <p id="detail-desc" class="text-sm md:text-base text-gray-600 leading-relaxed mb-8">説明文</p>
+                    <div class="border-t border-gray-100 pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <p class="text-xs md:text-sm text-gray-400 mb-1">参加状況</p>
+                            <p class="text-sm font-bold text-red-500" id="detail-count-status"></p>
+                        </div>
+                        <button id="join-btn" class="bg-red-400 hover:bg-red-500 text-white px-8 py-3 rounded-full font-bold shadow-md transition transform hover:scale-105 w-full sm:w-auto text-center text-sm md:text-base">
+                            参加する！
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-mypage" class="hidden-view max-w-4xl mx-auto py-6 md:py-10 px-4">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 text-center">
+                    <div class="w-20 h-20 md:w-24 md:h-24 bg-red-100 rounded-full mx-auto flex items-center justify-center text-3xl md:text-4xl mb-4">👤</div>
+                    <h1 class="text-xl md:text-2xl font-bold mb-1" id="mypage-user-email">読み込み中...</h1>
+                    <p class="text-xs md:text-sm text-gray-500 mb-6 md:mb-8">ガチクラス メンバー</p>
+                    <h3 class="text-left font-bold text-base md:text-lg mb-4 border-b pb-2">参加中・お気に入りの企画</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-left" id="mypage-joined-list"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="input-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <h2 class="text-lg font-bold mb-4" id="modal-title">新規投稿</h2>
+            <form id="modal-form" onsubmit="handleFormSubmit(event)">
+                <input type="hidden" id="modal-type">
+                <div class="mb-4" id="form-group-tag" style="display:none;">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">カテゴリ</label>
+                    <select id="input-tag" class="w-full border p-2 rounded-lg text-sm">
+                        <option value="ビジネス">ビジネス</option>
+                        <option value="テクノロジー">テクノロジー</option>
+                        <option value="英語・国際">英語・国際</option>
+                        <option value="アート・クリエイティブ">アート・クリエイティブ</option>
+                        <option value="社会課題">社会課題</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">タイトル</label>
+                    <input type="text" id="input-title" required class="w-full border p-2 rounded-lg text-sm" placeholder="タイトルを入力">
+                </div>
+                <div class="mb-4" id="form-group-org" style="display:none;">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">主催者 / 運営</label>
+                    <input type="text" id="input-org" class="w-full border p-2 rounded-lg text-sm" placeholder="主催・企業名など">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">開催日 / 締切日</label>
+                    <input type="date" id="input-date" required class="w-full border p-2 rounded-lg text-sm">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">詳しい説明</label>
+                    <textarea id="input-desc" required rows="4" class="w-full border p-2 rounded-lg text-sm" placeholder="詳細を記入してください"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-500 hover:bg-gray-50">キャンセル</button>
+                    <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white rounded-lg text-sm font-medium">追加する</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        // ⚠️ あなたのFirebase情報をここに貼り付けてください
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2B-EIBegsdH2Lojh7Du7bU6RjN_W4OzE",
+            authDomain: "gachiclass-app.firebaseapp.com",
+            projectId: "gachiclass-app",
+            storageBucket: "gachiclass-app.firebasestorage.app",
+            messagingSenderId: "10664785344",
+            appId: "1:10664785344:web:9176ed89752eaf9ccfc425"
+        };
+
+        // Firebase初期化
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // 状態変数
+        let currentUser = null;
+        let isSignUpMode = false; 
+        let currentYear = 2026;
+        let currentMonth = 6;
+        let globalBoards = [];
+        let globalQuests = [];
+        let myJoinedTitles = [];
+
+        // グローバル関数公開
+        window.navigate = navigate;
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+        window.handleFormSubmit = handleFormSubmit;
+        window.showDetail = showDetail;
+        window.changeMonth = changeMonth;
+        window.toggleAuthMode = toggleAuthMode;
+        window.handleAuthSubmit = handleAuthSubmit;
+        window.handleLogout = handleLogout;
+
+        // 👤 ログイン状態の監視
+        let unsubscribeBoards, unsubscribeQuests, unsubscribeUser;
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('view-auth').classList.add('hidden-view');
+                document.getElementById('app-content').classList.remove('hidden-view');
+                
+                document.getElementById('header-user-name').innerText = user.email.split('@')[0];
+                document.getElementById('mypage-user-email').innerText = user.email;
+
+                startRealtimeUpdates(user.uid);
+                navigate('home');
+            } else {
+                currentUser = null;
+                stopRealtimeUpdates();
+                document.getElementById('app-content').classList.add('hidden-view');
+                document.getElementById('view-auth').classList.remove('hidden-view');
+            }
+        });
+
+        // 🔐 ログイン・新規登録の処理
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+
+            try {
+                if (isSignUpMode) {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    alert("アカウントが作成され、ログインしました！");
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+            } catch (error) {
+                let msg = "エラーが発生しました";
+                if (error.code === 'auth/email-already-in-use') msg = "このメールアドレスは既に登録されています";
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') msg = "メールアドレスまたはパスワードが違います";
+                if (error.code === 'auth/invalid-email') msg = "不正なメールアドレス形式です";
+                if (error.code === 'auth/weak-password') msg = "パスワードは6文字以上で入力してください";
+                alert(msg);
+            }
+        }
+
+        function toggleAuthMode() {
+            isSignUpMode = !isSignUpMode;
+            document.getElementById('auth-title').innerText = isSignUpMode ? "新規アカウント作成" : "ガチクラスにログイン";
+            document.getElementById('auth-submit-btn').innerText = isSignUpMode ? "新しくアカウントを作る" : "ログインする";
+            document.getElementById('auth-toggle-btn').innerText = isSignUpMode ? "すでにアカウントをお持ちの方はこちら" : "初めて使う方はこちら（新規アカウント登録）";
+        }
+
+        async function handleLogout() {
+            if (confirm("ログアウトしますか？")) {
+                await signOut(auth);
+            }
+        }
+
+        // 🔄 データベース監視開始
+        function startRealtimeUpdates(uid) {
+            unsubscribeBoards = onSnapshot(collection(db, "boards"), (snapshot) => {
+                globalBoards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderAll();
+            });
+            unsubscribeQuests = onSnapshot(collection(db, "quests"), (snapshot) => {
+                globalQuests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderAll();
+            });
+            unsubscribeUser = onSnapshot(doc(db, "users", uid), (snapshot) => {
+                myJoinedTitles = snapshot.exists() ? (snapshot.data().joined || []) : [];
+                renderAll();
+            });
+        }
+
+        function stopRealtimeUpdates() {
+            if (unsubscribeBoards) unsubscribeBoards();
+            if (unsubscribeQuests) unsubscribeQuests();
+            if (unsubscribeUser) unsubscribeUser();
+        }
+
+        // 📝 画面描画ロジック一式
+        function renderAll() {
+            if (!currentUser) return;
+
+            const boardGrid = document.getElementById('board-grid');
+            if (boardGrid) boardGrid.innerHTML = globalBoards.map(createBoardCard).join('');
+
+            const questGrid = document.getElementById('quest-grid');
+            if (questGrid) questGrid.innerHTML = globalQuests.map(createQuestCard).join('');
+
+            const homeBoardMarquee = document.getElementById('home-board-marquee');
+            if (homeBoardMarquee) {
+                const modifyHtml = (html) => html.replace(/<div class="bg-white/, '<div class="bg-white inline-block mx-2 md:mx-4 shadow-md w-[85vw] md:w-[500px] whitespace-normal"');
+                let html = globalBoards.map(item => modifyHtml(createBoardCard(item))).join('');
+                homeBoardMarquee.innerHTML = html + html;
+            }
+
+            const homeQuestMarquee = document.getElementById('home-quest-marquee');
+            if (homeQuestMarquee) {
+                const modifyHtml = (html) => html.replace(/<div class="bg-white/, '<div class="bg-white inline-block mx-2 md:mx-4 shadow-md w-[85vw] md:w-[500px] whitespace-normal"');
+                let html = globalQuests.map(item => modifyHtml(createQuestCard(item))).join('');
+                homeQuestMarquee.innerHTML = html + html;
+            }
+
+            renderCalendar();
+
+            const mypageList = document.getElementById('mypage-joined-list');
+            if (mypageList) {
+                if (myJoinedTitles.length === 0) {
+                    mypageList.innerHTML = `<p class="text-sm text-gray-400 p-4">参加中・お気に入りの企画はまだありません。</p>`;
+                } else {
+                    mypageList.innerHTML = myJoinedTitles.map(title => `
+                        <div class="p-4 bg-white border border-gray-100 rounded-xl cursor-pointer hover:shadow transition text-sm md:text-base font-bold shadow-sm" onclick="showDetail('${title}')">
+                            ✨ ${title}
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            const detailTitle = document.getElementById('detail-title')?.innerText;
+            if (detailTitle) updateDetailJoinButton(detailTitle);
+        }
+
+        function createBoardCard(item) {
+            const count = item.members ? item.members.length : 0;
+            return `
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 flex flex-col justify-between cursor-pointer hover:shadow-md transition" onclick="showDetail('${item.title}')">
+                <div class="mb-4">
+                    <h3 class="font-bold text-lg md:text-[22px] mb-2 text-gray-800 leading-snug">${item.title}</h3>
+                    <p class="text-xs md:text-[15px] text-gray-500 whitespace-normal leading-relaxed">${item.desc}</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 md:gap-4 pt-4 border-t border-gray-100">
+                    <span class="text-red-500 border border-red-200 rounded-full px-3 py-1 text-[11px] md:text-xs font-bold bg-red-50/50 flex items-center shrink-0">
+                        <span class="mr-1">❤️</span>やりたい！${count}人
+                    </span>
+                    <div class="text-[11px] md:text-[13px] text-gray-400 flex items-center font-medium whitespace-nowrap">
+                        <span class="mr-1">📅</span>期限: ${formatDate(item.date)}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function createQuestCard(item) {
+            const count = item.members ? item.members.length : 0;
+            const colors = { 'ビジネス': '#ef4444', 'テクノロジー': '#3b82f6', '英語・国際': '#22c55e', 'アート・クリエイティブ': '#eab308', '社会課題': '#a855f7' };
+            const tagClasses = { 'ビジネス': 'bg-red-100 text-red-600', 'テクノロジー': 'bg-blue-100 text-blue-600', '英語・国際': 'bg-green-100 text-green-600', 'アート・クリエイティブ': 'bg-yellow-100 text-yellow-600', '社会課題': 'bg-purple-100 text-purple-600' };
+            const borderColor = colors[item.type] || '#ccc';
+            const tagClass = tagClasses[item.type] || 'bg-gray-100 text-gray-600';
+
+            return `
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 flex flex-col justify-between cursor-pointer hover:shadow-md transition border-t-[5px]" style="border-top-color: ${borderColor};" onclick="showDetail('${item.title}')">
+                <div class="mb-4">
+                    <span class="${tagClass} text-[10px] md:text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-2 inline-block">${item.type}</span>
+                    <h3 class="font-bold text-lg md:text-[22px] mb-1 text-gray-800 leading-snug">${item.title}</h3>
+                    <p class="text-[10px] md:text-xs text-gray-400 mb-2">${item.org || ''}</p>
+                    <p class="text-xs md:text-[15px] text-gray-500 whitespace-normal leading-relaxed">${item.desc}</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 md:gap-4 pt-4 border-t border-gray-100">
+                    <span class="text-red-500 border border-red-200 rounded-full px-3 py-1 text-[11px] md:text-xs font-bold bg-red-50/50 flex items-center shrink-0">
+                        <span class="mr-1">❤️</span>やりたい！${count}人
+                    </span>
+                    <div class="text-[11px] md:text-[13px] text-gray-400 flex items-center font-medium whitespace-nowrap">
+                        <span class="mr-1">📅</span>締切: ${formatDate(item.date)}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        // 📅 カレンダーの描画ロジック（自分が参加しているものだけに絞り込む）
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            if (!grid) return;
+
+            document.getElementById('calendar-month-year').innerText = `${currentYear}年 ${currentMonth}月`;
+            const firstDayIndex = new Date(currentYear, currentMonth - 1, 1).getDay();
+            const totalDays = new Date(currentYear, currentMonth, 0).getDate();
+
+            let gridHtml = `
+                <div class="bg-white p-2 text-center text-red-500 text-xs md:text-sm font-bold">日</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">月</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">火</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">水</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">木</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">金</div>
+                <div class="bg-white p-2 text-center text-blue-500 text-xs md:text-sm font-bold">土</div>
+            `;
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                gridHtml += `<div class="bg-white min-h-[80px] md:min-h-[100px] p-2"></div>`;
+            }
+
+            // すべてのデータ（boards と quests）の中から、自分が「参加中（myJoinedTitlesに入っている）」のものだけを抽出
+            const myEvents = [...globalBoards, ...globalQuests].filter(item => myJoinedTitles.includes(item.title));
+
+            for (let day = 1; day <= totalDays; day++) {
+                const dateString = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                // 日付が一致するイベントだけを抽出
+                const dayEvents = myEvents.filter(e => e.date === dateString);
+                
+                let eventLabelHtml = '';
+                dayEvents.forEach(evt => {
+                    eventLabelHtml += `<div class="bg-red-400 text-white text-[10px] md:text-xs p-1 rounded mt-1 truncate cursor-pointer shadow-sm" onclick="event.stopPropagation(); showDetail('${evt.title}')">✨ ${evt.title}</div>`;
+                });
+
+                gridHtml += `
+                    <div class="bg-white min-h-[80px] md:min-h-[100px] p-2 border-t border-gray-100 flex flex-col justify-between">
+                        <span class="text-xs font-medium text-gray-700">${day}</span>
+                        <div class="flex-grow overflow-y-auto">${eventLabelHtml}</div>
+                    </div>`;
+            }
+            grid.innerHTML = gridHtml;
+        }
+
+        function changeMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth > 12) { currentMonth = 1; currentYear++; }
+            if (currentMonth < 1) { currentMonth = 12; currentYear--; }
+            renderCalendar();
+        }
+
+        function openModal(type) {
+            document.getElementById('modal-type').value = type;
+            document.getElementById('form-group-tag').style.display = type === 'quest' ? 'block' : 'none';
+            document.getElementById('form-group-org').style.display = type === 'quest' ? 'block' : 'none';
+            
+            const titles = { 'board': 'やってみたいを投稿する', 'quest': '新しいクエストを追加' };
+            document.getElementById('modal-title').innerText = titles[type] || '新規追加';
+            document.getElementById('input-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('input-modal').classList.add('hidden');
+            document.getElementById('modal-form').reset();
+        }
+
+        // 🚀 データ送信
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const type = document.getElementById('modal-type').value;
+            const title = document.getElementById('input-title').value;
+            const date = document.getElementById('input-date').value;
+            const desc = document.getElementById('input-desc').value;
+
+            try {
+                if (type === 'board') {
+                    // 自分で投稿した内容は最初から参加（カレンダー自動登録）にする
+                    await addDoc(collection(db, "boards"), { title, date, desc, members: [currentUser.uid] });
+                    await joinProject(title); 
+                } else if (type === 'quest') {
+                    const tagType = document.getElementById('input-tag').value;
+                    const org = document.getElementById('input-org').value;
+                    await addDoc(collection(db, "quests"), { type: tagType, title, org, date, desc, members: [] });
+                }
+                closeModal();
+            } catch (error) {
+                alert("データの保存に失敗しました。: " + error.message);
+            }
+        }
+
+        function showDetail(title) {
+            const item = globalBoards.find(d => d.title === title) || globalQuests.find(d => d.title === title);
+            if (!item) return;
+
+            const tagEl = document.getElementById('detail-tag');
+            const orgEl = document.getElementById('detail-org');
+
+            if (item.type) {
+                tagEl.innerText = item.type;
+                tagEl.className = "text-xs font-bold px-2.5 py-0.5 rounded-full mb-2 inline-block bg-red-100 text-red-600";
+                tagEl.classList.remove('hidden');
+            } else {
+                tagEl.classList.add('hidden');
+            }
+
+            if (item.org) {
+                orgEl.innerText = item.org;
+                orgEl.classList.remove('hidden');
+            } else {
+                orgEl.classList.add('hidden');
+            }
+
+            document.getElementById('detail-title').innerText = item.title;
+            document.getElementById('detail-desc').innerText = item.desc;
+
+            updateDetailJoinButton(item.title);
+            navigate('detail');
+        }
+
+        function updateDetailJoinButton(title) {
+            const joinBtn = document.getElementById('join-btn');
+            const statusText = document.getElementById('detail-count-status');
+            
+            const item = globalBoards.find(d => d.title === title) || globalQuests.find(d => d.title === title);
+            const count = item && item.members ? item.members.length : 0;
+            statusText.innerText = `現在 ${count} 人が「やりたい！」と言っています`;
+
+            if (!joinBtn) return;
+
+            const isJoined = myJoinedTitles.includes(title);
+            if (isJoined) {
+                joinBtn.innerText = "参加を取り消す";
+                joinBtn.className = "bg-gray-400 hover:bg-gray-500 text-white px-8 py-3 rounded-full font-bold shadow-md transition transform hover:scale-105 w-full sm:w-auto text-center text-sm md:text-base";
+                joinBtn.onclick = () => leaveProject(title);
+            } else {
+                joinBtn.innerText = "参加する！";
+                joinBtn.className = "bg-red-400 hover:bg-red-500 text-white px-8 py-3 rounded-full font-bold shadow-md transition transform hover:scale-105 w-full sm:w-auto text-center text-sm md:text-base";
+                joinBtn.onclick = () => joinProject(title);
+            }
+        }
+
+        // ❤️ 参加処理（ユーザー固有ID連動）
+        async function joinProject(title) {
+            if (!currentUser) return;
+            const userRef = doc(db, "users", currentUser.uid);
+            
+            try {
+                await updateDoc(userRef, { joined: arrayUnion(title) }).catch(async () => {
+                    await setDoc(userRef, { joined: [title] });
+                });
+
+                const board = globalBoards.find(d => d.title === title);
+                if (board) await updateDoc(doc(db, "boards", board.id), { members: arrayUnion(currentUser.uid) });
+                
+                const quest = globalQuests.find(d => d.title === title);
+                if (quest) await updateDoc(doc(db, "quests", quest.id), { members: arrayUnion(currentUser.uid) });
+            } catch (e) {
+                alert("参加処理に失敗しました。");
+            }
+        }
+
+        async function leaveProject(title) {
+            if (!currentUser) return;
+            const userRef = doc(db, "users", currentUser.uid);
+
+            try {
+                await updateDoc(userRef, { joined: arrayRemove(title) });
+
+                const board = globalBoards.find(d => d.title === title);
+                if (board) await updateDoc(doc(db, "boards", board.id), { members: arrayRemove(currentUser.uid) });
+                
+                const quest = globalQuests.find(d => d.title === title);
+                if (quest) await updateDoc(doc(db, "quests", quest.id), { members: arrayRemove(currentUser.uid) });
+            } catch (e) {
+                alert("キャンセル処理に失敗しました。");
+            }
+        }
+
+        const views = ['home', 'board', 'calendar', 'quest', 'detail', 'mypage'];
+        function navigate(targetView) {
+            if (!currentUser) return;
+            window.scrollTo(0, 0);
+            views.forEach(view => {
+                const el = document.getElementById(`view-${view}`);
+                if (el) el.classList.add('hidden-view');
+                const tab = document.getElementById(`tab-${view}`);
+                if (tab) {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('text-gray-500');
+                }
+            });
+
+            const targetEl = document.getElementById(`view-${targetView}`);
+            if (targetEl) targetEl.classList.remove('hidden-view');
+            const activeTab = document.getElementById(`tab-${targetView}`);
+            if (activeTab) {
+                activeTab.classList.remove('text-gray-500');
+                activeTab.classList.add('tab-active');
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('mobile-menu-open');
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const d = new Date(dateStr);
+            const week = ['日', '月', '火', '水', '木', '金', '土'];
+            return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} (${week[d.getDay()]})`;
+        }
+    </script>
+</body>
+</html>
