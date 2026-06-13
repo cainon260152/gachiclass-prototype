@@ -365,18 +365,55 @@
             const questGrid = document.getElementById('quest-grid');
             if (questGrid) questGrid.innerHTML = globalQuests.map(createQuestCard).join('');
 
+            // 🏠 ホーム画面の「やってみたい」マルキー（流れるカード）
             const homeBoardMarquee = document.getElementById('home-board-marquee');
-            if (homeBoardMarquee) {
-                const modifyHtml = (html) => html.replace(/<div class="bg-white/, '<div class="bg-white inline-block mx-2 md:mx-4 shadow-md w-[85vw] md:w-[500px] whitespace-normal"');
-                let html = globalBoards.map(item => modifyHtml(createBoardCard(item))).join('');
-                homeBoardMarquee.innerHTML = html + html;
+            if (homeBoardMarquee && globalBoards.length > 0) {
+                // ホーム専用のすっきりカードを作成
+                let cardsHtml = globalBoards.map(item => {
+                    const count = item.members ? item.members.length : 0;
+                    return `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-[280px] md:w-[320px] h-[180px] flex flex-col justify-between shrink-0 mx-2 md:mx-3 text-left">
+                        <div>
+                            <h3 class="font-bold text-sm md:text-base text-gray-800 truncate mb-1">${item.title}</h3>
+                            <p class="text-xs text-gray-400 truncate">${item.desc}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-2 border-t border-gray-50 text-[11px]">
+                            <span class="text-red-500 font-bold">❤️ ${count}人</span>
+                            <span class="text-gray-400">📅 ${formatDate(item.date).split(' ')[0]}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+                
+                // 💡 投稿が少なくても画面幅を埋め尽くすまで自動ループ（途切れ防止）
+                let repeatCount = Math.max(2, Math.ceil(6 / globalBoards.length));
+                homeBoardMarquee.innerHTML = cardsHtml.repeat(repeatCount);
             }
 
+            // 🏠 ホーム画面の「クエスト」マルキー（流れるカード）
             const homeQuestMarquee = document.getElementById('home-quest-marquee');
-            if (homeQuestMarquee) {
-                const modifyHtml = (html) => html.replace(/<div class="bg-white/, '<div class="bg-white inline-block mx-2 md:mx-4 shadow-md w-[85vw] md:w-[500px] whitespace-normal"');
-                let html = globalQuests.map(item => modifyHtml(createQuestCard(item))).join('');
-                homeQuestMarquee.innerHTML = html + html;
+            if (homeQuestMarquee && globalQuests.length > 0) {
+                // ホーム専用のすっきりカードを作成
+                let cardsHtml = globalQuests.map(item => {
+                    const count = item.members ? item.members.length : 0;
+                    const colors = { 'ビジネス': '#ef4444', 'テクノロジー': '#3b82f6', '英語・国際': '#22c55e', 'アート・クリエイティブ': '#eab308', '社会課題': '#a855f7' };
+                    const borderColor = colors[item.type] || '#ccc';
+                    return `
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-[280px] md:w-[320px] h-[180px] flex flex-col justify-between shrink-0 mx-2 md:mx-3 text-left border-t-[4px]" style="border-top-color: ${borderColor};">
+                        <div>
+                            <span class="text-[9px] bg-gray-100 px-1.5 py-0.5 rounded font-bold text-gray-500 mb-1 inline-block">${item.type}</span>
+                            <h3 class="font-bold text-sm md:text-base text-gray-800 truncate mb-0.5">${item.title}</h3>
+                            <p class="text-xs text-gray-400 truncate">${item.desc}</p>
+                        </div>
+                        <div class="flex items-center justify-between pt-1 border-t border-gray-50 text-[11px]">
+                            <span class="text-red-500 font-bold">❤️ ${count}人</span>
+                            <span class="text-gray-400">📅 ${formatDate(item.date).split(' ')[0]}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+                
+                // 💡 投稿が少なくても画面幅を埋め尽くすまで自動ループ（途切れ防止）
+                let repeatCount = Math.max(2, Math.ceil(6 / globalQuests.length));
+                homeQuestMarquee.innerHTML = cardsHtml.repeat(repeatCount);
             }
 
             renderCalendar();
