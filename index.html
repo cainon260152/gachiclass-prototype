@@ -6,7 +6,7 @@
     <title>ガチクラス</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght=400;500;700&display=swap');
         body {
             font-family: 'Noto Sans JP', sans-serif;
             background-color: #fcfaf8;
@@ -103,9 +103,7 @@
             <button onclick="navigate('board'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500">やってみたいボード</button>
             <button onclick="navigate('calendar'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500">マイカレンダー</button>
             <button onclick="navigate('quest'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500">クエストボード</button>
-            <button onclick="navigate('mypage'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500 flex items-center justify-center space-x-2">
-                <span>👤 マイページ</span>
-            </button>
+            <button onclick="navigate('mypage'); toggleMobileMenu();" class="py-3 border-b border-gray-50 hover:bg-red-50 hover:text-red-500">👤 マイページ</button>
             <button onclick="handleLogout(); toggleMobileMenu();" class="py-3 text-red-400 hover:bg-red-50 font-bold">ログアウト</button>
         </nav>
 
@@ -137,7 +135,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-8">
                     <div>
                         <h1 class="text-xl md:text-2xl font-bold">マイカレンダー</h1>
-                        <p class="text-xs md:text-sm text-gray-500">自分が「参加する！」を押した企画のスケジュールが自動表示されます。</p>
+                        <p class="text-xs md:text-sm text-gray-500">自分が「参加する！」を押した企画のスケジュールが自動表示されます。（締切日を基準に表示）</p>
                     </div>
                 </div>
                 <div class="bg-white rounded-xl shadow border border-gray-100 p-4 md:p-6 overflow-x-auto">
@@ -169,9 +167,16 @@
                 <button onclick="navigate('board')" class="text-gray-500 hover:text-gray-800 mb-6 flex items-center text-sm md:text-base">＜ 戻る</button>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 md:p-8">
                     <span id="detail-tag" class="hidden text-xs font-bold px-2.5 py-0.5 rounded-full mb-2 inline-block"></span>
-                    <h1 id="detail-title" class="text-xl md:text-3xl font-bold mb-4">タイトル</h1>
-                    <p id="detail-org" class="text-xs md:text-sm text-gray-400 mb-2 hidden"></p>
-                    <p id="detail-desc" class="text-sm md:text-base text-gray-600 leading-relaxed mb-8">説明文</p>
+                    <h1 id="detail-title" class="text-xl md:text-3xl font-bold mb-2">タイトル</h1>
+                    
+                    <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs md:text-sm text-gray-400 mb-4 pb-4 border-b border-gray-50">
+                        <span id="detail-author">投稿者: 読み込み中...</span>
+                        <span id="detail-org" class="hidden"></span>
+                        <span id="detail-date-event">開催日: 未定</span>
+                        <span id="detail-date-deadline">締切日: --</span>
+                    </div>
+
+                    <p id="detail-desc" class="text-sm md:text-base text-gray-600 leading-relaxed mb-8 whitespace-pre-wrap">説明文</p>
                     <div class="border-t border-gray-100 pt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                         <div>
                             <p class="text-xs md:text-sm text-gray-400 mb-1">参加状況</p>
@@ -185,23 +190,34 @@
             </section>
 
             <section id="view-mypage" class="hidden-view max-w-4xl mx-auto py-6 md:py-10 px-4">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 text-center">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 text-center mb-6">
                     <div class="w-20 h-20 md:w-24 md:h-24 bg-red-100 rounded-full mx-auto flex items-center justify-center text-3xl md:text-4xl mb-4">👤</div>
-                    <h1 class="text-xl md:text-2xl font-bold mb-1" id="mypage-user-email">読み込み中...</h1>
-                    <p class="text-xs md:text-sm text-gray-500 mb-6 md:mb-8">ガチクラス メンバー</p>
-                    <h3 class="text-left font-bold text-base md:text-lg mb-4 border-b pb-2">参加中・お気に入りの企画</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-left" id="mypage-joined-list"></div>
+                    <h1 class="text-xl md:text-2xl font-bold mb-1" id="mypage-user-name">読み込み中...</h1>
+                    <p class="text-xs md:text-sm text-gray-400 mb-4 font-mono" id="mypage-user-email" style="display:inline-block; background:#f4f4f5; padding:2px 8px; rounded:4px;"></p>
+                    <p class="text-xs text-gray-400 mb-4 block">※メールアドレスはあなたにだけ見えています</p>
+                    
+                    <button onclick="openProfileModal()" class="text-xs bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-1.5 px-4 rounded-full transition">
+                        ⚙️ プロフィールを編集
+                    </button>
+
+                    <div class="mt-8 text-left">
+                        <h3 class="font-bold text-base md:text-lg mb-4 border-b pb-2 text-red-500">📝 自分の投稿した企画（編集・変更可能）</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8" id="mypage-my-posts-list"></div>
+
+                        <h3 class="font-bold text-base md:text-lg mb-4 border-b pb-2 text-gray-700">✨ 参加中・お気に入りの企画</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="mypage-joined-list"></div>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
     <div id="input-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <h2 class="text-lg font-bold mb-4" id="modal-title">新規投稿</h2>
             <form id="modal-form" onsubmit="handleFormSubmit(event)">
                 <input type="hidden" id="modal-type">
-                <div class="mb-4" id="form-group-tag" style="display:none;">
+                <input type="hidden" id="modal-edit-id"> <div class="mb-4" id="form-group-tag" style="display:none;">
                     <label class="block text-xs font-bold text-gray-500 mb-1">カテゴリ</label>
                     <select id="input-tag" class="w-full border p-2 rounded-lg text-sm">
                         <option value="ビジネス">ビジネス</option>
@@ -219,17 +235,49 @@
                     <label class="block text-xs font-bold text-gray-500 mb-1">主催者 / 運営</label>
                     <input type="text" id="input-org" class="w-full border p-2 rounded-lg text-sm" placeholder="主催・企業名など">
                 </div>
-                <div class="mb-4">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">開催日 / 締切日</label>
-                    <input type="date" id="input-date" required class="w-full border p-2 rounded-lg text-sm">
+                
+                <div class="mb-4 border p-3 rounded-xl bg-gray-50/50">
+                    <label class="block text-xs font-bold text-gray-600 mb-2">📅 スケジュール設定</label>
+                    
+                    <div class="mb-3">
+                        <label class="block text-[11px] font-bold text-gray-400 mb-1">締切日（必須項目）</label>
+                        <input type="date" id="input-date-deadline" required class="w-full border p-2 rounded-lg text-sm bg-white">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-[11px] font-bold text-gray-400">開催日（任意入力）</label>
+                            <label class="text-[11px] text-gray-500 flex items-center cursor-pointer">
+                                <input type="checkbox" id="input-date-event-unknown" onchange="toggleEventDateInput()" class="mr-1"> 開催日は未定
+                            </label>
+                        </div>
+                        <input type="date" id="input-date-event" class="w-full border p-2 rounded-lg text-sm bg-white">
+                    </div>
                 </div>
+
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-gray-500 mb-1">詳しい説明</label>
                     <textarea id="input-desc" required rows="4" class="w-full border p-2 rounded-lg text-sm" placeholder="詳細を記入してください"></textarea>
                 </div>
                 <div class="flex justify-end space-x-2">
                     <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-500 hover:bg-gray-50">キャンセル</button>
-                    <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white rounded-lg text-sm font-medium">追加する</button>
+                    <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white rounded-lg text-sm font-medium" id="modal-submit-btn">追加する</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="profile-modal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+            <h2 class="text-lg font-bold mb-4">プロフィールの編集</h2>
+            <form onsubmit="handleProfileSubmit(event)">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-500 mb-1">表示名（アプリ内での名前）</label>
+                    <input type="text" id="profile-name-input" required class="w-full border p-2 rounded-lg text-sm" placeholder="ニックネームなど">
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" onclick="closeProfileModal()" class="px-4 py-2 border rounded-lg text-sm text-gray-500 hover:bg-gray-50">キャンセル</button>
+                    <button type="submit" class="px-4 py-2 bg-red-400 hover:bg-red-500 text-white rounded-lg text-sm font-medium">保存する</button>
                 </div>
             </form>
         </div>
@@ -237,7 +285,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         // ⚠️ あなたのFirebase情報をここに貼り付けてください
@@ -250,19 +298,20 @@
             appId: "1:10664785344:web:9176ed89752eaf9ccfc425"
         };
 
-        // Firebase初期化
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // 状態変数
+        // 状態管理変数
         let currentUser = null;
+        let userProfileMap = {}; // UID -> 表示名のキャッシュマッピング
         let isSignUpMode = false; 
         let currentYear = 2026;
         let currentMonth = 6;
         let globalBoards = [];
         let globalQuests = [];
         let myJoinedTitles = [];
+        let myProfileName = "";
 
         // グローバル関数公開
         window.navigate = navigate;
@@ -275,16 +324,20 @@
         window.toggleAuthMode = toggleAuthMode;
         window.handleAuthSubmit = handleAuthSubmit;
         window.handleLogout = handleLogout;
+        window.toggleEventDateInput = toggleEventDateInput;
+        window.openProfileModal = openProfileModal;
+        window.closeProfileModal = closeProfileModal;
+        window.handleProfileSubmit = handleProfileSubmit;
+        window.openEditModal = openEditModal;
 
-        // 👤 ログイン状態の監視
-        let unsubscribeBoards, unsubscribeQuests, unsubscribeUser;
-        onAuthStateChanged(auth, (user) => {
+        let unsubscribeBoards, unsubscribeQuests, unsubscribeUser, unsubscribeAllUsers;
+        
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUser = user;
                 document.getElementById('view-auth').classList.add('hidden-view');
                 document.getElementById('app-content').classList.remove('hidden-view');
                 
-                document.getElementById('header-user-name').innerText = user.email.split('@')[0];
                 document.getElementById('mypage-user-email').innerText = user.email;
 
                 startRealtimeUpdates(user.uid);
@@ -297,7 +350,6 @@
             }
         });
 
-        // 🔐 ログイン・新規登録の処理
         async function handleAuthSubmit(e) {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
@@ -305,7 +357,13 @@
 
             try {
                 if (isSignUpMode) {
-                    await createUserWithEmailAndPassword(auth, email, password);
+                    const credential = await createUserWithEmailAndPassword(auth, email, password);
+                    // 新規登録時に初期プロフィール名をメアドの前半にする
+                    const initialName = email.split('@')[0];
+                    await setDoc(doc(db, "users", credential.user.uid), {
+                        name: initialName,
+                        joined: []
+                    });
                     alert("アカウントが作成され、ログインしました！");
                 } else {
                     await signInWithEmailAndPassword(auth, email, password);
@@ -314,8 +372,6 @@
                 let msg = "エラーが発生しました";
                 if (error.code === 'auth/email-already-in-use') msg = "このメールアドレスは既に登録されています";
                 if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') msg = "メールアドレスまたはパスワードが違います";
-                if (error.code === 'auth/invalid-email') msg = "不正なメールアドレス形式です";
-                if (error.code === 'auth/weak-password') msg = "パスワードは6文字以上で入力してください";
                 alert(msg);
             }
         }
@@ -328,21 +384,35 @@
         }
 
         async function handleLogout() {
-            if (confirm("ログアウトしますか？")) {
-                await signOut(auth);
-            }
+            if (confirm("ログアウトしますか？")) { await signOut(auth); }
         }
 
-        // 🔄 データベース監視開始
+        // 🔄 リアルタイムデータの同期
         function startRealtimeUpdates(uid) {
+            // 全ユーザーのプロフィール情報を追跡
+            unsubscribeAllUsers = onSnapshot(collection(db, "users"), (snapshot) => {
+                userProfileMap = {};
+                snapshot.forEach(doc => {
+                    userProfileMap[doc.id] = doc.data().name || "匿名ユーザー";
+                });
+                
+                // 自分自身の名前を反映
+                myProfileName = userProfileMap[uid] || uid.substring(0,5);
+                document.getElementById('header-user-name').innerText = myProfileName;
+                document.getElementById('mypage-user-name').innerText = myProfileName;
+                renderAll();
+            });
+
             unsubscribeBoards = onSnapshot(collection(db, "boards"), (snapshot) => {
                 globalBoards = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderAll();
             });
+
             unsubscribeQuests = onSnapshot(collection(db, "quests"), (snapshot) => {
                 globalQuests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderAll();
             });
+
             unsubscribeUser = onSnapshot(doc(db, "users", uid), (snapshot) => {
                 myJoinedTitles = snapshot.exists() ? (snapshot.data().joined || []) : [];
                 renderAll();
@@ -353,79 +423,141 @@
             if (unsubscribeBoards) unsubscribeBoards();
             if (unsubscribeQuests) unsubscribeQuests();
             if (unsubscribeUser) unsubscribeUser();
+            if (unsubscribeAllUsers) unsubscribeAllUsers();
         }
 
-        // 📝 画面描画ロジック一式
+        function toggleEventDateInput() {
+            const isUnknown = document.getElementById('input-date-event-unknown').checked;
+            const dateInput = document.getElementById('input-date-event');
+            if (isUnknown) {
+                dateInput.value = "";
+                dateInput.disabled = true;
+                dateInput.classList.add('bg-gray-100');
+            } else {
+                dateInput.disabled = false;
+                dateInput.classList.remove('bg-gray-100');
+            }
+        }
+
+        function openProfileModal() {
+            document.getElementById('profile-name-input').value = myProfileName;
+            document.getElementById('profile-modal').classList.remove('hidden');
+        }
+        function closeProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
+        }
+        async function handleProfileSubmit(e) {
+            e.preventDefault();
+            const newName = document.getElementById('profile-name-input').value;
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), { name: newName });
+                closeProfileModal();
+            } catch (err) {
+                alert("プロフィールの更新に失敗しました。");
+            }
+        }
+
+        // 📝 描画システム
         function renderAll() {
             if (!currentUser) return;
 
+            // ボードグリッド
             const boardGrid = document.getElementById('board-grid');
             if (boardGrid) boardGrid.innerHTML = globalBoards.map(createBoardCard).join('');
 
+            // クエストグリッド
             const questGrid = document.getElementById('quest-grid');
             if (questGrid) questGrid.innerHTML = globalQuests.map(createQuestCard).join('');
 
-            // 🏠 ホーム画面の「やってみたい」マルキー（流れるカード）
+            // 🏠 ホーム（流れるやってみたい）
             const homeBoardMarquee = document.getElementById('home-board-marquee');
             if (homeBoardMarquee && globalBoards.length > 0) {
-                // ホーム専用のすっきりカードを作成
                 let cardsHtml = globalBoards.map(item => {
                     const count = item.members ? item.members.length : 0;
+                    const authorName = userProfileMap[item.author] || "不明";
                     return `
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-[280px] md:w-[320px] h-[180px] flex flex-col justify-between shrink-0 mx-2 md:mx-3 text-left">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-[280px] md:w-[320px] h-[140px] flex flex-col justify-between shrink-0 mx-2 md:mx-3 text-left cursor-pointer" onclick="showDetail('${item.title}')">
                         <div>
-                            <h3 class="font-bold text-sm md:text-base text-gray-800 truncate mb-1">${item.title}</h3>
+                            <div class="flex justify-between items-center mb-0.5">
+                                <h3 class="font-bold text-sm md:text-base text-gray-800 truncate flex-grow">${item.title}</h3>
+                            </div>
+                            <p class="text-[10px] text-red-400 font-medium mb-1">👤 ${authorName}</p>
                             <p class="text-xs text-gray-400 truncate">${item.desc}</p>
                         </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-gray-50 text-[11px]">
+                        <div class="flex items-center justify-between pt-1.5 border-t border-gray-50 text-[11px]">
                             <span class="text-red-500 font-bold">❤️ ${count}人</span>
-                            <span class="text-gray-400">📅 ${formatDate(item.date).split(' ')[0]}</span>
+                            <span class="text-gray-400">📅 締切: ${formatDate(item.dateDeadline).split(' ')[0]}</span>
                         </div>
                     </div>`;
                 }).join('');
-                
-                // 💡 投稿が少なくても画面幅を埋め尽くすまで自動ループ（途切れ防止）
                 let repeatCount = Math.max(2, Math.ceil(6 / globalBoards.length));
                 homeBoardMarquee.innerHTML = cardsHtml.repeat(repeatCount);
             }
 
-            // 🏠 ホーム画面の「クエスト」マルキー（流れるカード）
+            // 🏠 ホーム（流れるクエスト）
             const homeQuestMarquee = document.getElementById('home-quest-marquee');
             if (homeQuestMarquee && globalQuests.length > 0) {
-                // ホーム専用のすっきりカードを作成
                 let cardsHtml = globalQuests.map(item => {
                     const count = item.members ? item.members.length : 0;
                     const colors = { 'ビジネス': '#ef4444', 'テクノロジー': '#3b82f6', '英語・国際': '#22c55e', 'アート・クリエイティブ': '#eab308', '社会課題': '#a855f7' };
                     const borderColor = colors[item.type] || '#ccc';
+                    const authorName = userProfileMap[item.author] || "不明";
                     return `
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-[280px] md:w-[320px] h-[180px] flex flex-col justify-between shrink-0 mx-2 md:mx-3 text-left border-t-[4px]" style="border-top-color: ${borderColor};">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 w-[280px] md:w-[320px] h-[150px] flex flex-col justify-between shrink-0 mx-2 md:mx-3 text-left border-t-[4px] cursor-pointer" style="border-top-color: ${borderColor};" onclick="showDetail('${item.title}')">
                         <div>
-                            <span class="text-[9px] bg-gray-100 px-1.5 py-0.5 rounded font-bold text-gray-500 mb-1 inline-block">${item.type}</span>
-                            <h3 class="font-bold text-sm md:text-base text-gray-800 truncate mb-0.5">${item.title}</h3>
+                            <div class="flex justify-between items-center mb-0.5">
+                                <span class="text-[9px] bg-gray-100 px-1.5 py-0.5 rounded font-bold text-gray-500 inline-block">${item.type}</span>
+                            </div>
+                            <h3 class="font-bold text-sm md:text-base text-gray-800 truncate">${item.title}</h3>
+                            <p class="text-[10px] text-blue-400 font-medium mb-1">👤 登録者: ${authorName}</p>
                             <p class="text-xs text-gray-400 truncate">${item.desc}</p>
                         </div>
                         <div class="flex items-center justify-between pt-1 border-t border-gray-50 text-[11px]">
                             <span class="text-red-500 font-bold">❤️ ${count}人</span>
-                            <span class="text-gray-400">📅 ${formatDate(item.date).split(' ')[0]}</span>
+                            <span class="text-gray-400">📅 締切: ${formatDate(item.dateDeadline).split(' ')[0]}</span>
                         </div>
                     </div>`;
                 }).join('');
-                
-                // 💡 投稿が少なくても画面幅を埋め尽くすまで自動ループ（途切れ防止）
                 let repeatCount = Math.max(2, Math.ceil(6 / globalQuests.length));
                 homeQuestMarquee.innerHTML = cardsHtml.repeat(repeatCount);
             }
 
             renderCalendar();
 
+            // マイページ: お気に入り・参加一覧
             const mypageList = document.getElementById('mypage-joined-list');
             if (mypageList) {
                 if (myJoinedTitles.length === 0) {
-                    mypageList.innerHTML = `<p class="text-sm text-gray-400 p-4">参加中・お気に入りの企画はまだありません。</p>`;
+                    mypageList.innerHTML = `<p class="text-sm text-gray-400 p-2">参加中の企画はまだありません。</p>`;
                 } else {
                     mypageList.innerHTML = myJoinedTitles.map(title => `
-                        <div class="p-4 bg-white border border-gray-100 rounded-xl cursor-pointer hover:shadow transition text-sm md:text-base font-bold shadow-sm" onclick="showDetail('${title}')">
-                            ✨ ${title}
+                        <div class="p-3 bg-white border border-gray-100 rounded-xl cursor-pointer hover:shadow transition text-sm font-bold flex justify-between items-center" onclick="showDetail('${title}')">
+                            <span>✨ ${title}</span>
+                            <span class="text-xs text-gray-400">詳細 ＞</span>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // マイページ: 自分の投稿一覧（編集機能付き）
+            const myPostsList = document.getElementById('mypage-my-posts-list');
+            if (myPostsList) {
+                const myBoards = globalBoards.filter(b => b.author === currentUser.uid);
+                const myQuests = globalQuests.filter(q => q.author === currentUser.uid);
+                const allMyPosts = [...myBoards.map(b => ({...b, _type: 'board'})), ...myQuests.map(q => ({...q, _type: 'quest'}))];
+
+                if (allMyPosts.length === 0) {
+                    myPostsList.innerHTML = `<p class="text-sm text-gray-400 p-2">あなたが投稿した企画はまだありません。</p>`;
+                } else {
+                    myPostsList.innerHTML = allMyPosts.map(item => `
+                        <div class="p-3 bg-red-50/30 border border-red-100 rounded-xl flex justify-between items-center text-sm">
+                            <div class="truncate mr-2 cursor-pointer" onclick="showDetail('${item.title}')">
+                                <span class="font-bold text-gray-800">${item.title}</span>
+                                <p class="text-[10px] text-gray-400">種類: ${item._type === 'board' ? 'やってみたい' : 'クエスト'}</p>
+                            </div>
+                            <button onclick="openEditModal('${item._type}', '${item.id}')" class="bg-white hover:bg-gray-100 border text-gray-600 font-bold px-3 py-1 rounded-lg text-xs shrink-0 transition shadow-sm">
+                                ✏️ 編集
+                            </button>
                         </div>
                     `).join('');
                 }
@@ -437,19 +569,17 @@
 
         function createBoardCard(item) {
             const count = item.members ? item.members.length : 0;
+            const authorName = userProfileMap[item.author] || "不明";
             return `
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 flex flex-col justify-between cursor-pointer hover:shadow-md transition" onclick="showDetail('${item.title}')">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col justify-between cursor-pointer hover:shadow-md transition" onclick="showDetail('${item.title}')">
                 <div class="mb-4">
-                    <h3 class="font-bold text-lg md:text-[22px] mb-2 text-gray-800 leading-snug">${item.title}</h3>
-                    <p class="text-xs md:text-[15px] text-gray-500 whitespace-normal leading-relaxed">${item.desc}</p>
+                    <h3 class="font-bold text-lg text-gray-800 mb-0.5 leading-snug">${item.title}</h3>
+                    <p class="text-xs text-red-400 font-medium mb-3">👤 投稿者: ${authorName}</p>
+                    <p class="text-xs md:text-sm text-gray-500 line-clamp-3 leading-relaxed">${item.desc}</p>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 md:gap-4 pt-4 border-t border-gray-100">
-                    <span class="text-red-500 border border-red-200 rounded-full px-3 py-1 text-[11px] md:text-xs font-bold bg-red-50/50 flex items-center shrink-0">
-                        <span class="mr-1">❤️</span>やりたい！${count}人
-                    </span>
-                    <div class="text-[11px] md:text-[13px] text-gray-400 flex items-center font-medium whitespace-nowrap">
-                        <span class="mr-1">📅</span>期限: ${formatDate(item.date)}
-                    </div>
+                <div class="flex flex-wrap items-center justify-between pt-3 border-t border-gray-100 text-xs">
+                    <span class="text-red-500 font-bold bg-red-50 px-2.5 py-1 rounded-full border border-red-100">❤️ ${count}人</span>
+                    <div class="text-gray-400 font-medium">📅 締切: ${formatDate(item.dateDeadline)}</div>
                 </div>
             </div>`;
         }
@@ -460,27 +590,27 @@
             const tagClasses = { 'ビジネス': 'bg-red-100 text-red-600', 'テクノロジー': 'bg-blue-100 text-blue-600', '英語・国際': 'bg-green-100 text-green-600', 'アート・クリエイティブ': 'bg-yellow-100 text-yellow-600', '社会課題': 'bg-purple-100 text-purple-600' };
             const borderColor = colors[item.type] || '#ccc';
             const tagClass = tagClasses[item.type] || 'bg-gray-100 text-gray-600';
+            const authorName = userProfileMap[item.author] || "不明";
 
             return `
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 flex flex-col justify-between cursor-pointer hover:shadow-md transition border-t-[5px]" style="border-top-color: ${borderColor};" onclick="showDetail('${item.title}')">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col justify-between cursor-pointer hover:shadow-md transition border-t-[5px]" style="border-top-color: ${borderColor};" onclick="showDetail('${item.title}')">
                 <div class="mb-4">
-                    <span class="${tagClass} text-[10px] md:text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-2 inline-block">${item.type}</span>
-                    <h3 class="font-bold text-lg md:text-[22px] mb-1 text-gray-800 leading-snug">${item.title}</h3>
-                    <p class="text-[10px] md:text-xs text-gray-400 mb-2">${item.org || ''}</p>
-                    <p class="text-xs md:text-[15px] text-gray-500 whitespace-normal leading-relaxed">${item.desc}</p>
-                </div>
-                <div class="flex flex-wrap items-center gap-2 md:gap-4 pt-4 border-t border-gray-100">
-                    <span class="text-red-500 border border-red-200 rounded-full px-3 py-1 text-[11px] md:text-xs font-bold bg-red-50/50 flex items-center shrink-0">
-                        <span class="mr-1">❤️</span>やりたい！${count}人
-                    </span>
-                    <div class="text-[11px] md:text-[13px] text-gray-400 flex items-center font-medium whitespace-nowrap">
-                        <span class="mr-1">📅</span>締切: ${formatDate(item.date)}
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="${tagClass} text-[10px] font-bold px-2.5 py-0.5 rounded-full inline-block">${item.type}</span>
                     </div>
+                    <h3 class="font-bold text-lg text-gray-800 mb-0.5 leading-snug">${item.title}</h3>
+                    <p class="text-xs text-blue-400 font-medium mb-2">👤 登録者: ${authorName}</p>
+                    <p class="text-[11px] text-gray-400 mb-2 font-medium">${item.org || ''}</p>
+                    <p class="text-xs md:text-sm text-gray-500 line-clamp-3 leading-relaxed">${item.desc}</p>
+                </div>
+                <div class="flex flex-wrap items-center justify-between pt-3 border-t border-gray-100 text-xs">
+                    <span class="text-red-500 font-bold bg-red-50 px-2.5 py-1 rounded-full border border-red-100">❤️ ${count}人</span>
+                    <div class="text-gray-400 font-medium">📅 締切: ${formatDate(item.dateDeadline)}</div>
                 </div>
             </div>`;
         }
 
-        // 📅 カレンダーの描画ロジック（自分が参加しているものだけに絞り込む）
+        // 📅 マイカレンダー描画
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             if (!grid) return;
@@ -490,35 +620,33 @@
             const totalDays = new Date(currentYear, currentMonth, 0).getDate();
 
             let gridHtml = `
-                <div class="bg-white p-2 text-center text-red-500 text-xs md:text-sm font-bold">日</div>
-                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">月</div>
-                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">火</div>
-                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">水</div>
-                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">木</div>
-                <div class="bg-white p-2 text-center text-gray-700 text-xs md:text-sm font-bold">金</div>
-                <div class="bg-white p-2 text-center text-blue-500 text-xs md:text-sm font-bold">土</div>
+                <div class="bg-white p-2 text-center text-red-500 text-xs font-bold">日</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs font-bold">月</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs font-bold">火</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs font-bold">水</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs font-bold">木</div>
+                <div class="bg-white p-2 text-center text-gray-700 text-xs font-bold">金</div>
+                <div class="bg-white p-2 text-center text-blue-500 text-xs font-bold">土</div>
             `;
 
             for (let i = 0; i < firstDayIndex; i++) {
-                gridHtml += `<div class="bg-white min-h-[80px] md:min-h-[100px] p-2"></div>`;
+                gridHtml += `<div class="bg-white min-h-[80px] p-2"></div>`;
             }
 
-            // すべてのデータ（boards と quests）の中から、自分が「参加中（myJoinedTitlesに入っている）」のものだけを抽出
             const myEvents = [...globalBoards, ...globalQuests].filter(item => myJoinedTitles.includes(item.title));
 
             for (let day = 1; day <= totalDays; day++) {
                 const dateString = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
-                // 日付が一致するイベントだけを抽出
-                const dayEvents = myEvents.filter(e => e.date === dateString);
+                // 締切日ベースでカレンダーにマッピング
+                const dayEvents = myEvents.filter(e => e.dateDeadline === dateString);
                 
                 let eventLabelHtml = '';
                 dayEvents.forEach(evt => {
-                    eventLabelHtml += `<div class="bg-red-400 text-white text-[10px] md:text-xs p-1 rounded mt-1 truncate cursor-pointer shadow-sm" onclick="event.stopPropagation(); showDetail('${evt.title}')">✨ ${evt.title}</div>`;
+                    eventLabelHtml += `<div class="bg-red-400 text-white text-[10px] p-1 rounded mt-1 truncate cursor-pointer shadow-sm" onclick="event.stopPropagation(); showDetail('${evt.title}')">🚨 締切: ${evt.title}</div>`;
                 });
 
                 gridHtml += `
-                    <div class="bg-white min-h-[80px] md:min-h-[100px] p-2 border-t border-gray-100 flex flex-col justify-between">
+                    <div class="bg-white min-h-[80px] p-2 border-t border-gray-100 flex flex-col justify-between">
                         <span class="text-xs font-medium text-gray-700">${day}</span>
                         <div class="flex-grow overflow-y-auto">${eventLabelHtml}</div>
                     </div>`;
@@ -533,13 +661,52 @@
             renderCalendar();
         }
 
+        // モーダル処理（新規追加モード）
         function openModal(type) {
             document.getElementById('modal-type').value = type;
+            document.getElementById('modal-edit-id').value = ""; // 新規追加なので空
             document.getElementById('form-group-tag').style.display = type === 'quest' ? 'block' : 'none';
             document.getElementById('form-group-org').style.display = type === 'quest' ? 'block' : 'none';
             
-            const titles = { 'board': 'やってみたいを投稿する', 'quest': '新しいクエストを追加' };
-            document.getElementById('modal-title').innerText = titles[type] || '新規追加';
+            document.getElementById('modal-title').innerText = type === 'board' ? 'やってみたいを投稿する' : '新しいクエストを追加';
+            document.getElementById('modal-submit-btn').innerText = "追加する";
+            
+            // フォーム初期化
+            document.getElementById('input-date-event-unknown').checked = false;
+            toggleEventDateInput();
+
+            document.getElementById('input-modal').classList.remove('hidden');
+        }
+
+        // モーダル処理（既存の編集モード）
+        function openEditModal(type, id) {
+            const item = type === 'board' ? globalBoards.find(b => b.id === id) : globalQuests.find(q => q.id === id);
+            if (!item) return;
+
+            document.getElementById('modal-type').value = type;
+            document.getElementById('modal-edit-id').value = id;
+            
+            document.getElementById('form-group-tag').style.display = type === 'quest' ? 'block' : 'none';
+            document.getElementById('form-group-org').style.display = type === 'quest' ? 'block' : 'none';
+            if(type === 'quest' && item.type) document.getElementById('input-tag').value = item.type;
+            if(type === 'quest' && item.org) document.getElementById('input-org').value = item.org;
+
+            document.getElementById('modal-title').innerText = "投稿内容を編集する";
+            document.getElementById('modal-submit-btn').innerText = "変更を保存する";
+
+            document.getElementById('input-title').value = item.title;
+            document.getElementById('input-desc').value = item.desc;
+            document.getElementById('input-date-deadline').value = item.dateDeadline || "";
+            
+            if (!item.dateEvent || item.dateEvent === "未定") {
+                document.getElementById('input-date-event-unknown').checked = true;
+                document.getElementById('input-date-event').value = "";
+            } else {
+                document.getElementById('input-date-event-unknown').checked = false;
+                document.getElementById('input-date-event').value = item.dateEvent;
+            }
+            toggleEventDateInput();
+
             document.getElementById('input-modal').classList.remove('hidden');
         }
 
@@ -548,29 +715,47 @@
             document.getElementById('modal-form').reset();
         }
 
-        // 🚀 データ送信
+        // 🚀 データ送信・更新
         async function handleFormSubmit(e) {
             e.preventDefault();
             if (!currentUser) return;
 
             const type = document.getElementById('modal-type').value;
+            const editId = document.getElementById('modal-edit-id').value;
+            
             const title = document.getElementById('input-title').value;
-            const date = document.getElementById('input-date').value;
             const desc = document.getElementById('input-desc').value;
+            const dateDeadline = document.getElementById('input-date-deadline').value;
+            
+            const isUnknown = document.getElementById('input-date-event-unknown').checked;
+            const dateEvent = isUnknown ? "未定" : (document.getElementById('input-date-event').value || "未定");
+
+            const collectionName = type === 'board' ? "boards" : "quests";
+
+            const dataPayload = {
+                title,
+                desc,
+                dateDeadline,
+                dateEvent
+            };
 
             try {
-                if (type === 'board') {
-                    // 自分で投稿した内容は最初から参加（カレンダー自動登録）にする
-                    await addDoc(collection(db, "boards"), { title, date, desc, members: [currentUser.uid] });
-                    await joinProject(title); 
-                } else if (type === 'quest') {
-                    const tagType = document.getElementById('input-tag').value;
-                    const org = document.getElementById('input-org').value;
-                    await addDoc(collection(db, "quests"), { type: tagType, title, org, date, desc, members: [] });
+                if (editId) {
+                    // ✏️ 編集（既存データの書き換え）
+                    await updateDoc(doc(db, collectionName, editId), dataPayload);
+                    alert("変更を保存しました！");
+                } else {
+                    // ＋ 新規追加
+                    dataPayload.author = currentUser.uid; // 投稿主のUIDを付与
+                    dataPayload.members = type === 'board' ? [currentUser.uid] : [];
+                    
+                    await addDoc(collection(db, collectionName), dataPayload);
+                    if (type === 'board') { await joinProject(title); }
+                    alert("新しく投稿しました！");
                 }
                 closeModal();
             } catch (error) {
-                alert("データの保存に失敗しました。: " + error.message);
+                alert("データの保存に失敗しました: " + error.message);
             }
         }
 
@@ -590,7 +775,7 @@
             }
 
             if (item.org) {
-                orgEl.innerText = item.org;
+                orgEl.innerText = `主催: ${item.org}`;
                 orgEl.classList.remove('hidden');
             } else {
                 orgEl.classList.add('hidden');
@@ -598,6 +783,14 @@
 
             document.getElementById('detail-title').innerText = item.title;
             document.getElementById('detail-desc').innerText = item.desc;
+            
+            // 投稿主の名前をマッピングから取得
+            const authorName = userProfileMap[item.author] || "不明";
+            document.getElementById('detail-author').innerText = `投稿者: ${authorName}`;
+
+            // 日付表示のセット
+            document.getElementById('detail-date-deadline').innerText = `締切日: ${formatDate(item.dateDeadline)}`;
+            document.getElementById('detail-date-event').innerText = `開催日: ${item.dateEvent === '未定' ? '未定' : formatDate(item.dateEvent)}`;
 
             updateDetailJoinButton(item.title);
             navigate('detail');
@@ -625,41 +818,30 @@
             }
         }
 
-        // ❤️ 参加処理（ユーザー固有ID連動）
         async function joinProject(title) {
             if (!currentUser) return;
             const userRef = doc(db, "users", currentUser.uid);
-            
             try {
                 await updateDoc(userRef, { joined: arrayUnion(title) }).catch(async () => {
                     await setDoc(userRef, { joined: [title] });
                 });
-
                 const board = globalBoards.find(d => d.title === title);
                 if (board) await updateDoc(doc(db, "boards", board.id), { members: arrayUnion(currentUser.uid) });
-                
                 const quest = globalQuests.find(d => d.title === title);
                 if (quest) await updateDoc(doc(db, "quests", quest.id), { members: arrayUnion(currentUser.uid) });
-            } catch (e) {
-                alert("参加処理に失敗しました。");
-            }
+            } catch (e) { alert("参加処理に失敗しました。"); }
         }
 
         async function leaveProject(title) {
             if (!currentUser) return;
             const userRef = doc(db, "users", currentUser.uid);
-
             try {
                 await updateDoc(userRef, { joined: arrayRemove(title) });
-
                 const board = globalBoards.find(d => d.title === title);
                 if (board) await updateDoc(doc(db, "boards", board.id), { members: arrayRemove(currentUser.uid) });
-                
                 const quest = globalQuests.find(d => d.title === title);
                 if (quest) await updateDoc(doc(db, "quests", quest.id), { members: arrayRemove(currentUser.uid) });
-            } catch (e) {
-                alert("キャンセル処理に失敗しました。");
-            }
+            } catch (e) { alert("キャンセル処理に失敗しました。"); }
         }
 
         const views = ['home', 'board', 'calendar', 'quest', 'detail', 'mypage'];
@@ -690,8 +872,9 @@
         }
 
         function formatDate(dateStr) {
-            if (!dateStr) return '';
+            if (!dateStr || dateStr === "未定") return '未定';
             const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return '未定';
             const week = ['日', '月', '火', '水', '木', '金', '土'];
             return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} (${week[d.getDay()]})`;
         }
